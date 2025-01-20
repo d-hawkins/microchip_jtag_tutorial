@@ -1,0 +1,353 @@
+% =============================================================================
+\section{JTAG-to-Register}
+% =============================================================================
+\label{sec:jtag_to_register}
+
+% -----------------------------------------------------------------------------
+\subsection{Architecture}
+% -----------------------------------------------------------------------------
+
+% -----------------------------------------------------------------------------
+% JTAG-to-Register Block Diagram
+% -----------------------------------------------------------------------------
+%
+\begin{figure}[t]
+  \begin{center}
+    \includegraphics[width=\textwidth]
+    {figures/ujtag_to_register_diagram.pdf}
+  \end{center}
+  \caption{JTAG-to-Register block diagram.}
+  \label{fig:jtag_to_register_diagram}
+\end{figure}
+% -----------------------------------------------------------------------------
+
+The JTAG-to-Register component implements a single write (control) and
+read (status) register. The register bit-width is controlled by a
+SystemVerilog parameter, WIDTH. Figure~\ref{fig:jtag_to_register_diagram}
+shows a block diagram of the architecture.
+%
+The JTAG-to-Register component uses a single-bit input select bit.
+%
+Figure~\ref{fig:jtag_to_register_diagram} shows the select bit will
+assert for any valid user instruction (0x10 to 0x7F). User designs
+could use the IR to select (and multiplex UTDO)  different blocks of
+user logic.
+
+Figure~\ref{fig:jtag_to_register_timing_ir} shows the instruction
+shift-register timing. The TDO data shown in the figure is the
+value read from the PolarFire SoC Discovery Kit.
+%
+Figure~\ref{fig:jtag_to_register_timing_ir} shows the data
+shift-register timing. The figure shows TDI serializing 0x55 and
+TDO serializing 0x11. These timing diagrams are reproduced by the
+JTAG-to-Register testbench, and are discussed in the
+Questasim waveform section.
+
+% -----------------------------------------------------------------------------
+% JTAG-to-Register Shift-IR
+% -----------------------------------------------------------------------------
+%
+\begin{landscape}
+\begin{figure}[p]
+  \begin{center}
+    \includegraphics[width=210mm]
+    {figures/ujtag_to_register_timing_ir.pdf}
+  \end{center}
+  \caption{JTAG-to-Register JTAG instruction shift-register timing.}
+  \label{fig:jtag_to_register_timing_ir}
+\end{figure}
+\end{landscape}
+% -----------------------------------------------------------------------------
+
+% -----------------------------------------------------------------------------
+% JTAG-to-Register Shift-DR
+% -----------------------------------------------------------------------------
+%
+\begin{landscape}
+\begin{figure}[p]
+  \begin{center}
+    \includegraphics[width=210mm]
+    {figures/ujtag_to_register_timing_dr.pdf}
+  \end{center}
+  \caption{JTAG-to-Register JTAG data shift-register timing.}
+  \label{fig:jtag_to_register_timing_dr}
+\end{figure}
+\end{landscape}
+% -----------------------------------------------------------------------------
+
+\clearpage
+% -----------------------------------------------------------------------------
+\subsection{Testbench}
+% -----------------------------------------------------------------------------
+
+The JTAG-to-Register component is general-purpose, so is located in the
+repository intellectual property (IP) directory \verb+ip/jtag_to_register+.
+The JTAG-to-Register testbench is run as follows;
+%
+\begin{enumerate}
+\item Start Questasim (2023.4 was used for this tutorial)
+\item Change directory to the project, eg.,
+\begin{verbatim}
+vsim> cd {C:\github\microchip_jtag_tutorial\ip\jtag_to_register}
+\end{verbatim}
+\item Source the simulation script, eg.,
+\begin{verbatim}
+vsim> source scripts/questasim.tcl
+\end{verbatim}
+The script ends with a list of the testbench procedures
+\begin{verbatim}
+# Testbench Procedures
+# --------------------
+#
+#  jtag_to_register_tb - run the JTAG-to-Register testbench
+#
+\end{verbatim}
+\item Run the testbench
+\begin{verbatim}
+vsim> jtag_to_register_tb
+\end{verbatim}
+\end{enumerate}
+%
+The testbench uses the SmartFusion2 UJTAG component.
+
+\clearpage
+% -----------------------------------------------------------------------------
+\subsection{Waveforms}
+% -----------------------------------------------------------------------------
+
+% -----------------------------------------------------------------------------
+% JTAG-to-Register Questasim Waveforms
+% -----------------------------------------------------------------------------
+%
+\begin{figure}[t]
+  \begin{center}
+    \includegraphics[width=\textwidth]
+    {figures/jtag_to_register_questasim_waveforms.png}
+  \end{center}
+  \caption{JTAG-to-Register testbench Questasim waveforms.}
+  \label{fig:jtag_to_register_questasim_waveforms}
+\end{figure}
+% -----------------------------------------------------------------------------
+
+Figure~\ref{fig:jtag_to_register_questasim_waveforms} shows the Questasim
+waveform view captured from the JTAG-to-Register testbench, with the
+JTAG-to-Register component configured for 8-bits control/status width.
+%
+The testbench interfaces to the JTAG signals and implements the following
+sequence;
+%
+\begin{itemize}
+\item TAP reset
+\item Load the 8-bit instruction register with 0x20
+\item Load the 8-bit data register with 0x11 = 0001\_0001b
+\item Load the 8-bit data register with 0x55 = 0101\_0101b
+\item Load the 8-bit data register with 0x99 = 1001\_1001b
+\item TAP reset
+\end{itemize}
+%
+Figure~\ref{fig:jtag_to_register_questasim_waveforms} shows the data
+register load with 0x55. Items of interest in the
+waveform are;
+%
+\begin{itemize}
+\item TDI contains the LSB-to-MSB serial data 0x55 = 0101\_0101b
+\item TDO contains the LSB-to-MSB serial data 0x11 = 0001\_0001b
+\item UTDO updates on the rising-edge of TCK
+\item TDO updates on the falling-edge of TCK
+\item status is captureed during the CAPTURE TAP state
+\item control is updated during the UPDATE TAP state
+\end{itemize}
+%
+
+\clearpage
+% -----------------------------------------------------------------------------
+\subsection{Software Interfacing with STAPL}
+% -----------------------------------------------------------------------------
+
+% -----------------------------------------------------------------------------
+% Polarfire SoC Discovery and the Digilent Arty board
+% -----------------------------------------------------------------------------
+%
+\begin{figure}[t]
+  \begin{center}
+    \includegraphics[width=\textwidth]
+    {figures/pfs_disco_and_arty.png}\\
+  \end{center}
+  \caption{PolarFire SoC Discovery Kit and the Digilent Arty Board.}
+  \label{fig:pfs_disco_and_arty}
+\end{figure}
+% -----------------------------------------------------------------------------
+
+STAPL (Standard Test and Programming Language) is an Altera-developed standard
+for JTAG interfacing, standardized in JEDEC standard
+JESD-71~\cite{JEDEC_JESD71_1999}.
+%
+Two STAPL files are located in the repository:
+%
+\begin{itemize}
+\item \verb+stp/read_idcode.stp+
+
+Read and print a Microchip JTAG device IDCODE.
+
+This script resets the TAP, loads the instruction register with the 8-bit
+read IDCODE instruction, and then reads a single 32-bit IDCODE.
+
+\item \verb+stp/jtag_to_register.stp+
+
+Incrementing LED count.
+
+This script resets the TAP, loads the instruction register with the 8-bit
+user instruction 0x20, and then loops from 1 to 15, loading the data register
+with the loop index, and printing the value read (which matches the previously
+loaded loop index).
+
+\end{itemize}
+%
+The first version of the JTAG-to-Register STAPL was based on the example in
+AC227 Appendix A~\cite{Microchip_AC227_2015}. The JEDEC STAPL specification
+was then consulted to understand the syntax for: loops, integer-to-binary
+conversion, binary-to-integer conversion, and printing messages.
+
+Figure~\ref{fig:pfs_disco_and_arty} shows the hardware setup used to
+capture logic analyzer traces. The PolarFire SoC Discovery Kit Raspberry
+Pi connector drove UJTAG signals to a PMod connector on the
+Digilent Arty board, and the Xilinx Vivado
+\href{https://www.xilinx.com/products/intellectual-property/ila.html}
+{Integrated Logic Analyzer (ILA)} was used to capture traces.
+%
+FlashPro Express was used to execute the JTAG-to-Register STAPL file.
+Figure~\ref{fig:jtag_to_register_stapl} shows logic analyzer traces for
+TDI serializing 0x02, 0x03, and 0x04, and TDO serializing 0x01, 0x02, and
+0x03.
+
+\clearpage
+% -----------------------------------------------------------------------------
+\subsection{Software Interfacing with FTDI D2XX}
+% -----------------------------------------------------------------------------
+
+A JTAG-to-Register application was written in C++, compiled with Microsoft
+Visual Studio 2022 (Community Edition), and linked with the FTDI D2XX DLL
+(the application is part of the FTDI D2XX tutorial).
+%
+The application used the FTDI Multi-Protocol Synchronous Serial Engine
+(MPSSE) mode to implement JTAG transactions.
+%
+Figure~\ref{fig:jtag_to_register_d2xx} shows logic analyzer traces for
+TDI serializing 0x02, 0x03, and 0x04, and TDO serializing 0x01, 0x02, and
+0x03. The logic analyzer traces are very similar to those captured from the
+FlashPro Express STAPL transactions in
+Figure~\ref{fig:jtag_to_register_stapl}, with one minor difference in
+that the STAPL captures show additional TCK pulses while in Run-Test-Idle.
+
+% -----------------------------------------------------------------------------
+% JTAG-to-Register on the Polarfire SoC
+% -----------------------------------------------------------------------------
+%
+\begin{figure}[p]
+  \begin{center}
+    \includegraphics[width=0.95\textwidth]
+    {figures/jtag_to_register_stapl_0x02_0x01.png}\\
+    (a) Write 0x02 = 0000\_0010b. Read 0x01 = 0000\_0001b
+  \end{center}
+  \vskip5mm
+  \begin{center}
+    \includegraphics[width=0.95\textwidth]
+    {figures/jtag_to_register_stapl_0x03_0x02.png}\\
+    (b) Write 0x03 = 0000\_0011b. Read 0x02 = 0000\_0010b
+  \end{center}
+  \vskip5mm
+  \begin{center}
+    \includegraphics[width=0.95\textwidth]
+    {figures/jtag_to_register_stapl_0x04_0x03.png}\\
+    (c) Write 0x04 = 0000\_0100b. Read 0x03 = 0000\_0011b
+  \end{center}
+  \caption{JTAG-to-Register logic analyzer traces for STAPL interfacing.}
+  \label{fig:jtag_to_register_stapl}
+\end{figure}
+% -----------------------------------------------------------------------------
+
+% -----------------------------------------------------------------------------
+% JTAG-to-Register on the Polarfire SoC
+% -----------------------------------------------------------------------------
+%
+\begin{figure}[p]
+  \begin{center}
+    \includegraphics[width=0.95\textwidth]
+    {figures/jtag_to_register_d2xx_0x02_0x01.png}\\
+    (a) Write 0x02 = 0000\_0010b. Read 0x01 = 0000\_0001b
+  \end{center}
+  \vskip5mm
+  \begin{center}
+    \includegraphics[width=0.95\textwidth]
+    {figures/jtag_to_register_d2xx_0x03_0x02.png}\\
+    (b) Write 0x03 = 0000\_0011b. Read 0x02 = 0000\_0010b
+  \end{center}
+  \vskip5mm
+  \begin{center}
+    \includegraphics[width=0.95\textwidth]
+    {figures/jtag_to_register_d2xx_0x04_0x03.png}\\
+    (c) Write 0x04 = 0000\_0100b. Read 0x03 = 0000\_0011b
+  \end{center}
+  \caption{JTAG-to-Register logic analyzer traces for FTDI D2XX interfacing.}
+  \label{fig:jtag_to_register_d2xx}
+\end{figure}
+% -----------------------------------------------------------------------------
+
+
+
+% -----------------------------------------------------------------------------
+\subsection{Hardware Implementations}
+% -----------------------------------------------------------------------------
+
+Table~\ref{tab:jtag_to_register_hardware} shows the JTAG-to-Register
+design was implemented on the following hardware:
+%
+\begin{itemize}
+\item Microchip Polarfire SoC Discovery Kit
+(\href{https://www.microchip.com/en-us/development-tool/mpfs-disco-kit}
+{MPFS-DISCO-KIT})
+
+\item Microchip ProASIC3 Starter Kit
+(\href{https://www.microchip.com/en-us/development-tool/a3pe-starter-kit-2}
+{A3PE-STARTER-KIT-2})
+
+\item Microchip SmartFusion2 Security Evaluation Kit
+(\href{https://www.microchip.com/en-us/development-tool/m2s090ts-eval-kit}
+{M2S090TS-EVAL-KIT})
+
+\item Emcraft SmartFusion2 Starter Kit
+(\href{https://emcraft.com/products/153}{SF2-STARTER-KIT})
+
+The tutorial used the ES version of this kit: SF2-STARTER-KIT-ES
+
+\item Avnet SmartFusion2 Kickstart Kit (no longer available)
+
+\end{itemize}
+%
+The UJTAG component is supported by other Microchip FPGAs, eg.,
+\href{https://www.microchip.com/en-us/development-tool/m2gl-eval-kit}{IGLOO2}.
+
+% -----------------------------------------------------------------------------
+% Hardware implementations
+% -----------------------------------------------------------------------------
+%
+\begin{table}
+\caption{JTAG-to-Register hardware implementations.}
+\label{tab:jtag_to_register_hardware}
+\begin{center}
+\begin{tabular}{|l|l|l|}
+\hline
+Directory & Board & Control\\
+\hline\hline
+&&\\
+\texttt{designs/pfs\_disco}     & PolarFire SoC Discovery & 4 LEDs\\
+\texttt{designs/pa3\_starter}   & ProASIC3 Starter        & TBD\\
+\texttt{designs/sf2\_security}  & SmartFusion2 Security   & 4 LEDs\\
+\texttt{designs/sf2\_starter}   & SmartFusion2 Starter    & 1 LED\\
+\texttt{designs/sf2\_kickstart} & SmartFusion2 Kickstart  & 4 LEDs\\
+&&\\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+% -----------------------------------------------------------------------------

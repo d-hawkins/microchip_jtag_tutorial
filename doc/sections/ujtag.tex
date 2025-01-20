@@ -1,0 +1,306 @@
+% =============================================================================
+\section{UJTAG}
+% =============================================================================
+\label{sec:ujtag}
+
+% -----------------------------------------------------------------------------
+\subsection{Overview}
+% -----------------------------------------------------------------------------
+
+The Microchip UJTAG component is described in
+AC227~\cite{Microchip_AC227_2015} and in the
+\href{https://www.microchip.com/en-us/products/fpgas-and-plds/fpgas/proasic-3-fpgas}
+{ProASIC3} Fabric Users Guide~\cite{Microchip_PA3_UG_2012}.
+%
+The UJTAG component is also described in the Macro Library Users Guide for
+each device.
+%
+Figure~\ref{fig:polarfire_macro_ujtag} shows the Microchip UJTAG component from
+the PolarFire Macro Library in the Libero SoC online documentation for v2024.2.
+%
+UJTAG is also supported in
+\href{https://www.microchip.com/en-us/products/fpgas-and-plds/fpgas/igloo-2-fpgas}
+{IGLOO2},
+\href{https://www.microchip.com/en-us/products/fpgas-and-plds/system-on-chip-fpgas/smartfusion-2-fpgas}
+{SmartFusion2},
+\href{https://www.microchip.com/en-us/products/fpgas-and-plds/fpgas/polarfire-fpgas/polarfire-mid-range-fpgas}
+{Polarfire}, and
+\href{https://www.microchip.com/en-us/products/fpgas-and-plds/system-on-chip-fpgas/polarfire-soc-fpgas}
+{PolarFire SoC} devices.
+%
+The example designs in this tutorial target evaluation boards for
+the ProASIC3, SmartFusion2, and PolarFire SoC devices.
+
+The UJTAG component provides user logic access to the JTAG clock, serial data
+in and out, the 8-bit instruction register, and four TAP state indicators.
+The serial data in and TAP state indicators change on the falling-edge of
+the JTAG clock.
+%
+A user interface to the UJTAG component typically consists of;
+%
+\begin{itemize}
+\item A shift-register used for serial data in and out (shifted LSB-to-MSB)
+\item URSTB used as asynchronous reset
+\item UDRCK used as the clock
+\item UIREG[7:0] used as a select (or multiplex) control
+\item UDRCAP used to load the shift-register
+\item UDRSH used to enable the shift-register
+\item UDRUPD used to capture the shift-register into a parallel register
+\item UTDO driven by the shift-register LSB
+\end{itemize}
+%
+A user interface to the UJTAG component does not have to use all UJTAG signals.
+For example, an SPI-like interface can be constructed using;
+%
+\begin{itemize}
+\item SPI clock is UDRCK
+\item SPI select generated from a UIREG pattern (or bit) and UDRSH
+\item SPI MOSI is UTDI
+\item SPI MISO is UTDO
+\end{itemize}
+%
+The SPI analogy works well for hardware designs containing only a single
+device in the JTAG chain. The serial data stream is slightly different
+for hardware designs containing multiple devices daisy-chained in the JTAG chain.
+When communicating with a single device on a multi-device JTAG chain, the other
+devices are placed in BYPASS mode, and each bypassed device introduces a
+zero valued bit into the serial data stream. These extra bits can be handled
+by detecting the number of devices in BYPASS mode before, and after, the
+selected device.
+
+The UJTAG UTDO input must be driven on the rising-edge of UDRCK, as the UJTAG
+contains a falling-edge register on the path to the JTAG TDO output.
+Figure~\ref{fig:jtag_to_register_questasim_waveforms} shows the Questasim
+simulation waveforms of the JTAG-to-Register design. The serial data on TDI
+is 0x55 = 0101\_0101b, while the serial data out on TDO is 0x11 = 0001\_0001b.
+The UTDO data, highlighted in cyan, is clocked on the rising-edge of DRCK
+within the fabric logic. The TDO changes are observed to occur on the
+falling-edge of TCK.
+%
+The operation of UTDO is inconsistent with AC227, where Figure 4 on p3 indicates
+that UTDO = TDO~\cite{Microchip_AC227_2015}, and is inconsistent with the ProASIC3
+fabric users guide statement on p381 that \emph{UTDI, UTDO, and UDRCK are directly
+connected to the JTAG TDI, TDO, and TCK ports, respectively.}~\cite{Microchip_PA3_UG_2012}.
+%
+The UJTAG simulation models for the ProASIC3 (Libero IDE 9.2 SP4 \verb+proasic3e.v+ library)
+and for the SmartFusion2 (Libero SoC 2024.1 \verb+smartfusion2.v+ library) both
+exhibit the same UTDO-to-TDO pipelining through a falling-edge register
+(see the testbenches in \verb+ip/ujtag+).
+
+Figures~\ref{fig:sf2_starter_ujtag_ila_tdo_rise}
+and~\ref{fig:sf2_starter_ujtag_ila_tdo_fall} show logic analyzer traces
+captured from the SmartFusion2 Starter Kit for UJTAG designs that
+drove UTDO on the rising-edge and falling-edge of UDRCK respectively.
+The SmartFusion 2 Starter Kit was used, as it contains both an FPGA
+JTAG header and an ARM debug header, so the JTAG signals could be
+probed on the ARM header. The JTAG communications were implemented by
+an FTDI D2XX applications. The logic analyzer traces were captured using
+the Digilent Arty board and Xilinx Vivado.
+%
+\begin{itemize}
+\item \textcolor{OliveGreen}{\textbf{TDO driven on UDRCK rising-edge}}
+
+The TDO bits in Figure~\ref{fig:sf2_starter_ujtag_ila_tdo_rise}
+match the expected values.
+
+\item \textcolor{red}{\textbf{TDO driven on UDRCK falling-edge}}
+
+The TDO bits in Figure~\ref{fig:sf2_starter_ujtag_ila_tdo_fall} do not match
+the expected values: the expected bit values are delayed by 1-bit,
+with the 2 LSBs repeated.
+
+\end{itemize}
+%
+\vskip5mm
+\begin{center}
+\textcolor{magenta}{\textbf{Conclusion:} UTDO must be clocked on UDRCK rising-edge.}
+\end{center}
+
+% -----------------------------------------------------------------------------
+% PolarFire Macro Library UJTAG
+% -----------------------------------------------------------------------------
+%
+\begin{figure}[t]
+  \begin{minipage}{0.5\textwidth}
+  \begin{center}
+    \includegraphics[width=0.7\textwidth]
+    {figures/polarfire_macro_ujtag.pdf}\\
+    (a) Component
+  \end{center}
+  \end{minipage}
+  \hfil
+  \begin{minipage}{0.5\textwidth}
+  \begin{center}
+  \begin{tabular}{l|l}
+  Pin & Function\\
+  \hline
+  &\\
+  &\textbf{JTAG}\\
+  TRSTB      & Reset (active low)\\
+  TCK        & Clock\\
+  TMS        & Test mode select\\
+  TDI        & Serial data in\\
+  TDO        & Serial data out\\
+  &\\
+  &\textbf{TAP State}\\
+  URSTB      & Test-Logic-Reset\\
+  UDRCAP     & Capture-DR\\
+  UDRSH      & Shift-DR\\
+  UDRUPD     & Update-DR\\
+  &\\
+  &\textbf{User}\\
+  UIREG[7:0] & Instruction\\
+  UDRCK      & Clock\\
+  UTDI       & Serial data in\\
+  UTDO       & Serial data out\\
+  &\\
+  \hline
+  \end{tabular}\\
+  \vskip1mm
+  (b) Pin functions
+  \end{center}
+  \end{minipage}
+  \caption{Microchip UJTAG component.}
+  \label{fig:polarfire_macro_ujtag}
+\end{figure}
+% -----------------------------------------------------------------------------
+
+\clearpage
+% -----------------------------------------------------------------------------
+% SmartFusion2 Starter Kit ILA traces for UTDO updated on DRCK rising-edge
+% -----------------------------------------------------------------------------
+%
+\begin{figure}[p]
+  \begin{center}
+    \includegraphics[width=0.95\textwidth]
+    {figures/sf2_starter_ujtag_ila_tdo_rise_0x09_0x08.png}\\
+    (a) Write 0x09 = 0000\_\textcolor{blue}{1001}b. Read 0x08 = 0000\_\textcolor{blue}{1000}b
+  \end{center}
+%  \vskip5mm
+  \begin{center}
+    \includegraphics[width=0.95\textwidth]
+    {figures/sf2_starter_ujtag_ila_tdo_rise_0x0A_0x09.png}\\
+    (b) Write 0x0A = 0000\_\textcolor{blue}{1010}b. Read 0x09 = 0000\_\textcolor{blue}{1001}b
+  \end{center}
+%  \vskip5mm
+  \begin{center}
+    \includegraphics[width=0.95\textwidth]
+    {figures/sf2_starter_ujtag_ila_tdo_rise_0x0B_0x0A.png}\\
+    (c) Write 0x0B = 0000\_\textcolor{blue}{1011}b. Read 0x0A = 0000\_\textcolor{blue}{1010}b
+  \end{center}
+%  \vskip5mm
+  \begin{center}
+    \includegraphics[width=0.95\textwidth]
+    {figures/sf2_starter_ujtag_ila_tdo_rise_0x0C_0x0B.png}\\
+    (d) Write 0x0C = 0000\_\textcolor{blue}{1100}b. Read 0x0B = 0000\_\textcolor{blue}{1011}b
+  \end{center}
+  \caption{JTAG logic analyzer traces for UTDO driven on UDRCK rising-edge.}
+  \label{fig:sf2_starter_ujtag_ila_tdo_rise}
+\end{figure}
+% -----------------------------------------------------------------------------
+
+\clearpage
+% -----------------------------------------------------------------------------
+% SmartFusion2 Starter Kit ILA traces for UTDO updated on DRCK falling-edge
+% -----------------------------------------------------------------------------
+%
+\begin{figure}[p]
+  \begin{center}
+    \includegraphics[width=0.95\textwidth]
+    {figures/sf2_starter_ujtag_ila_tdo_fall_0x09_0x10.png}\\
+    (a) Write 0x09 = 0000\_\textcolor{blue}{1001}b. Read 0x10 = 000\textcolor{blue}{1\_000}\textcolor{red}{0}b
+  \end{center}
+%  \vskip5mm
+  \begin{center}
+    \includegraphics[width=0.95\textwidth]
+    {figures/sf2_starter_ujtag_ila_tdo_fall_0x0A_0x13.png}\\
+    (b) Write 0x0A = 0000\_\textcolor{blue}{1010}b. Read 0x13 = 000\textcolor{blue}{1\_001}\textcolor{red}{1}b
+  \end{center}
+%  \vskip5mm
+  \begin{center}
+    \includegraphics[width=0.95\textwidth]
+    {figures/sf2_starter_ujtag_ila_tdo_fall_0x0B_0x14.png}\\
+    (c) Write 0x0B = 0000\_\textcolor{blue}{1011}b. Read 0x14 = 000\textcolor{blue}{1\_010}\textcolor{red}{0}b
+  \end{center}
+%  \vskip5mm
+  \begin{center}
+    \includegraphics[width=0.95\textwidth]
+    {figures/sf2_starter_ujtag_ila_tdo_fall_0x0C_0x17.png}\\
+    (d) Write 0x0C = 0000\_\textcolor{blue}{1100}b. Read 0x17 = 000\textcolor{blue}{1\_011}\textcolor{red}{1}b
+  \end{center}
+  \caption{JTAG logic analyzer traces for UTDO driven on UDRCK falling-edge.}
+  \label{fig:sf2_starter_ujtag_ila_tdo_fall}
+\end{figure}
+% -----------------------------------------------------------------------------
+
+\clearpage
+% -----------------------------------------------------------------------------
+\subsection{UJTAG Testbench}
+% -----------------------------------------------------------------------------
+
+The simplest usage of the UJTAG component is a serial-to-parallel register
+with write (host-to-FPGA) and read (FPGA-to-host) support. This sort of
+interface is commonly found in SPI devices. For example, the Texas Instruments
+LMX2615-SP clock synthesizer uses a 24-bit SPI transaction consisting of;
+%
+\begin{itemize}
+\item 1-bit read(1)/write(0) indicator
+\item 7-bit address (128 possible registers)
+\item 16-bit data
+\end{itemize}
+%
+Another example is the Texas Instruments LMK04832 clock synthesizer which
+also uses a 24-bit SPI transaction, but with a slightly different bit
+functionality;
+%
+\begin{itemize}
+\item 1-bit read(1)/write(0) indicator
+\item 15-bit address (32768 possible registers)
+\item 8-bit data
+\end{itemize}
+%
+The UJTAG component could be used to create this interface, but for the
+purpose of this tutorial, just the serial-to-parallel register is
+implemented, without interpretation of the read/write register bits.
+
+The UJTAG testbench is located in the repository directory \verb+ip/ujtag+.
+The UJTAG testbench is run as follows;
+%
+\begin{enumerate}
+\item Start Questasim (2023.4 was used for this tutorial)
+\item Change directory to the project, eg.,
+\begin{verbatim}
+vsim> cd {C:\github\microchip_jtag_tutorial\ip\ujtag}
+\end{verbatim}
+\item Source the simulation script, eg.,
+\begin{verbatim}
+vsim> source scripts/questasim.tcl
+\end{verbatim}
+The script ends with a list of the testbench procedures
+\begin{verbatim}
+# Testbench Procedures
+# --------------------
+#
+#  ujtag_pa3_tb - run the UJTAG ProASIC3 testbench
+#  ujtag_sf2_tb - run the UJTAG Smartfusion2 (and newer) testbench
+#
+\end{verbatim}
+\item Run the ProASIC3 UJTAG testbench
+\begin{verbatim}
+vsim> ujtag_pa3_tb
+\end{verbatim}
+\item Run the SmartFusion2 UJTAG testbench
+\begin{verbatim}
+vsim> ujtag_sf2_tb
+\end{verbatim}
+\end{enumerate}
+%
+There are two UJTAG testbenches as the ProASIC3 (and earlier) devices used
+a slightly different port naming convention than the SmartFusion2 (and newer)
+devices. A UJTAG wrapper component is used to update the ProASIC3 port mapping
+to match that of the SmartFusion2 port mapping, and the testbench instantiates
+the wrapper. See the source code for additional details.
+
+The UJTAG testbench implements the JTAG-to-Register component within the
+testbench. The next section describes the JTAG-to-Register implemented as
+a separate SystemVerilog module.

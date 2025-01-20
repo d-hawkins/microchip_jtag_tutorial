@@ -1,0 +1,104 @@
+% =============================================================================
+\section{Introduction}
+% =============================================================================
+\label{sec:intro}
+
+This tutorial demonstrates how to use the Microchip FPGA UJTAG
+component~\cite{Microchip_AC227_2015}.
+%
+The Microchip UJTAG component provides a communications path over the
+JTAG\footnote{Joint Test Action Group.} interface to a user design
+implemented in the programmable logic fabric of an
+FPGA\footnote{Field Programmable Gate Array.}.
+%
+Similar JTAG-to-fabric interfaces from other FPGA vendors are;
+Altera Virtual JTAG~\cite{Altera_VJTAG_2021} and
+Xilinx BSCAN~\cite{Xilinx_UG908_2024}.
+%
+Figure~\ref{fig:jtag_tap} shows the JTAG (IEEE 1149.1) Test Access Port
+(TAP) Controller. JTAG TAP state transitions are controlled by the JTAG
+clock (TCK) and test mode select (TMS) control.
+
+This tutorial includes:
+%
+\begin{itemize}
+\item Hardware implementation of the UJTAG component
+\item UJTAG software interfacing using FlashPro Express and STAPL
+\item UJTAG software interfacing using FTDI D2XX under Windows and Linux
+\end{itemize}
+%
+The FTDI D2XX~\cite{FTDI_D2XX_PG_2023} example applications were tested
+under Windows 10 and Ubuntu 24.04\footnote{Ubuntu was tested using an
+Oracle VirtualBox Virtual Machine (VM) running under Windows 10.}.
+
+% -----------------------------------------------------------------------------
+% JTAG TAP
+% -----------------------------------------------------------------------------
+\begin{figure}[t]
+  \begin{center}
+    \includegraphics[width=\textwidth]
+    {figures/jtag_tap.pdf}
+  \end{center}
+  \caption{JTAG (IEEE 1149.1) Test Access Port (TAP) Controller~\cite{IEEE_STD_1149_1_2013}.}
+  \label{fig:jtag_tap}
+\end{figure}
+% -----------------------------------------------------------------------------
+
+\clearpage
+% =============================================================================
+\section{Resources}
+% =============================================================================
+\label{sec:resources}
+
+Resources related to this tutorial are:
+%
+\begin{itemize}
+\item Libero SoC Download:
+%
+\begin{itemize}
+\item
+\href{https://www.microchip.com/en-us/products/fpgas-and-plds/fpga-and-soc-design-tools/fpga/libero-software-later-versions}
+{https://www.microchip.com/en-us/products/fpgas-and-plds/\newline
+fpga-and-soc-design-tools/fpga/libero-software-later-versions}
+
+\item
+Libero SoC 2024.1 was used during the development of this tutorial.
+\end{itemize}
+
+\item Polarfire SoC Discovery Kit (MPFS-DISCO-KIT):
+%
+\begin{itemize}
+\item
+\href{https://www.microchip.com/en-us/development-tool/mpfs-disco-kit}
+{https://www.microchip.com/en-us/development-tool/mpfs-disco-kit}
+\end{itemize}
+
+\item FTDI D2XX software tutorial
+%
+\begin{itemize}
+\item
+\href{https://github.com/d-hawkins/ftdi_d2xx_tutorial}
+{https://github.com/d-hawkins/ftdi\_d2xx\_tutorial}
+\end{itemize}
+
+\item Altera JTAG tutorials
+%
+\begin{itemize}
+\item
+\href{https://github.com/d-hawkins/altera_jtag_to_avalon_mm_tutorial/blob/main/doc/altera_jtag_to_avalon_mm_tutorial.pdf}
+{altera\_jtag\_to\_avalon\_mm\_tutorial.pdf}
+
+\item
+\href{https://github.com/d-hawkins/altera_jtag_to_avalon_analysis/blob/main/doc/altera_jtag_to_avalon_analysis.pdf}
+{altera\_jtag\_to\_avalon\_analysis.pdf}
+
+\item
+\href{https://github.com/d-hawkins/altera_virtual_jtag_analysis/blob/main/doc/altera_virtual_jtag_analysis.pdf}
+{altera\_virtual\_jtag\_analysis.pdf}
+\end{itemize}
+
+\item Xilinx JTAG tutorial (in progress)
+
+\end{itemize}
+%
+The bibliography contains additional references.

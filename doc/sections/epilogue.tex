@@ -1,0 +1,37 @@
+% =============================================================================
+\section{Epilogue}
+% =============================================================================
+\label{sec:epilogue}
+
+This tutorial (and associated design files) demonstrates the use of the
+Microchip UJTAG component: simulation, synthesis, and hardware
+implementation.
+%
+The UJTAG component and the JTAG-to-Register example form the basis
+for more complex JTAG interface components:
+%
+\begin{itemize}
+\item \textbf{JTAG-to-AXI-Stream Bridge}
+
+The JTAG-to-AXI-Stream bridge interfaces JTAG serial data streams into
+byte streams compiliant with the ARM
+\href{https://developer.arm.com/documentation/ihi0051/latest}
+{AMBA AXI-Stream Protocol Specification}.
+%
+The JTAG TDO bit-stream is converted to an AXI-Stream Transmitter
+byte-stream, while the JTAG TDI bit-stream is used to receive data
+from an AXI-Stream Receiver byte-stream.
+
+\item \textbf{JTAG-to-AXI Bridge}
+
+The JTAG-to-AXI bridge interfaces JTAG serial data streams into transactions
+compliant with the ARM
+\href{https://developer.arm.com/documentation/ihi0022/latest}
+{AMBA AXI Protocol Specification}.
+%
+The JTAG-to-AXI bridge combines the JTAG-to-AXI-Stream Bridge with an
+AXI-Stream-to-AXI Manager.
+
+\end{itemize}
+%
+These components can be found on the same github as this tutorial.
