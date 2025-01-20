@@ -1,0 +1,43 @@
+' -----------------------------------------------------------------------------
+' jtag_to_register.stp
+'
+' 1/15/2025 D. W. Hawkins (dwh@caltech.edu)
+'
+' Microchip FlashPro Express JTAG-to-Register test STAPL.
+'
+' The JTAG-to-Register test sends an incrementing count over JTAG.
+' If the design implements control/status loopback, then the read
+' value is the previous write value.
+'
+' If the readback value is 255 (0xFF) check the JTAG-to-Register
+' design has been programmed to the development board.
+'
+' -----------------------------------------------------------------------------
+'
+NOTE "CREATOR" "FlashPro Version: v2024.1";
+
+ACTION RUN_TEST = JTAG_TO_REGISTER;
+
+PROCEDURE JTAG_TO_REGISTER;
+	BOOLEAN DRSCAN_OUT[8];
+	INTEGER INDEX;
+
+	PRINT "================================================";
+	PRINT "JTAG-to-Register Test";
+	PRINT "================================================";
+
+	WAIT RESET, 5 CYCLES;
+
+	PRINT "IRSCAN 32";
+	IRSCAN 8,$20;
+
+	FOR INDEX = 1 TO 15;
+		DRSCAN 8, BOOL(INDEX), CAPTURE DRSCAN_OUT[];
+		PRINT "DRSCAN (IN, OUT) = (", INDEX, ", ", 
+			INT(DRSCAN_OUT[]), ")";
+		WAIT 1000000 USEC;
+	NEXT INDEX;
+
+ENDPROC;
+
+CRC 0000;

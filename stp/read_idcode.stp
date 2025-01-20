@@ -1,0 +1,38 @@
+' -----------------------------------------------------------------------------
+' read_idcode.stp
+'
+' 1/15/2025 D. W. Hawkins (dwh@caltech.edu)
+'
+' Microchip FlashPro Express read IDCODE STAPL.
+'
+' Development Kit           Device       IDCODE
+' -----------------------   ----------   -----------
+' Polarfire SoC Discovery   MPFS095T     0x0F81_81CF
+' SF2 Starter               M2S050T_ES   0x1F80_21CF
+'
+' -----------------------------------------------------------------------------
+'
+NOTE "CREATOR" "FlashPro Version: v2024.1";
+
+ACTION READ_IDCODE = DO_READ_IDCODE;
+
+PROCEDURE DO_READ_IDCODE;
+
+'Declare variables for data arrays
+BOOLEAN read_data[32];
+BOOLEAN ir_idcode[8] = #00001111;
+BOOLEAN ones_data[32] = $FFFFFFFF;
+
+'Initialize device
+STATE RESET;
+
+'Load idcode instruction (optional, since TAP reset loaded the IDCODE)
+IRSCAN 8, ir_idcode[7..0];
+
+'Capture idcode
+DRSCAN 32, ones_data[31..0], CAPTURE read_data[31..0];
+
+EXPORT "IDCODE", read_data[31..0];
+
+ENDPROC;
+CRC 0000;
