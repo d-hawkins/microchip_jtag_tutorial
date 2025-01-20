@@ -1,0 +1,45 @@
+# -----------------------------------------------------------------------------
+# pa3_starter.pdc
+#
+# 1/15/2025 D. W. Hawkins (dwh@caltech.edu)
+#
+# ProASIC3 Starter Kit Physical Design Constraints (PDC).
+#
+# -----------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------
+# 40MHz clock
+# -----------------------------------------------------------------------------
+#
+# * Schematic reference designator U1
+# * Schematic net name CLOCKF
+# * U1 power supply is 3.3V
+# * ProASIC (U8) pin number 26
+# * ProASIC (U8) pin name GFA0 (Chip Global input on left-side)
+# * ProASIC (U8) Bank 7: VMV7 = 2.5V
+#
+set_io clk_40mhz      \
+    -pinname 26       \
+    -fixed yes        \
+    -iostd LVCMOS25   \
+    -DIRECTION INPUT
+
+# -----------------------------------------------------------------------------
+# LEDs
+# -----------------------------------------------------------------------------
+#
+# Bank 5: VMV5 = 1.5V or 1.8V or 2.5V or 3.3V (selectable)
+#
+# For VMV5 = 3.3V
+#
+set pin_list [list 63 61 60 59 58 57 56 55]
+for {set i 0} {$i < 8} {incr i} {
+	set pin [lindex $pin_list $i]
+	set_io led\[$i\]     \
+		-pinname $pin    \
+		-fixed yes       \
+		-iostd LVCMOS33  \
+		-REGISTER No     \
+		-OUT_DRIVE 4     \
+		-SLEW Low
+}

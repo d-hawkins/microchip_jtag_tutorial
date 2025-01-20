@@ -1,0 +1,91 @@
+# -----------------------------------------------------------------------------
+# pfs_disco.sdc
+#
+# 1/15/2025 D. W. Hawkins (dwh@caltech.edu)
+#
+# Microchip PolarFire SoC Discovery Kit Physical Design Constraints (PDC).
+#
+# -----------------------------------------------------------------------------
+# References
+# ----------
+#
+# [1] Microchip, "PolarFire SoC Discovery Kit Schematic", Sept, 2023.
+#     PolarFire_SoC_Discovery_Kit_Rev2_SCH_090423_01.pdf
+#
+# ----------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------
+# Dedicated JTAG pins
+# -----------------------------------------------------------------------------
+#
+set_io -port_name tck    -pin_name A8 -DIRECTION INPUT
+set_io -port_name tdi    -pin_name A9 -DIRECTION INPUT
+set_io -port_name tdo    -pin_name A7 -DIRECTION OUTPUT
+set_io -port_name tms    -pin_name B7 -DIRECTION INPUT
+set_io -port_name trst_n -pin_name B9 -DIRECTION INPUT
+
+# -----------------------------------------------------------------------------
+# Clock
+# -----------------------------------------------------------------------------
+#
+# The clock connects to Bank-0 with VDDIO = 1.8V (p7 [1]).
+#
+set_io -port_name clk_50mhz \
+	-DIRECTION INPUT        \
+	-io_std LVCMOS18        \
+	-pin_name R18           \
+	-fixed true
+
+# -----------------------------------------------------------------------------
+# LEDs
+# -----------------------------------------------------------------------------
+#
+# The FPGA LEDs connect to Bank-0 with VDDIO = 1.8V (p7 [1]).
+#
+# The board has 8 LEDs but only 7 are connected to the FPGA.
+#
+set pins [list T18 V17 U20 U21 AA18 V16 U15]
+for {set i 0} {$i < 7} {incr i} {
+	set pin [lindex $pins $i]
+	set_io -port_name led\[$i\] \
+		-DIRECTION OUTPUT       \
+		-io_std LVCMOS18        \
+		-pin_name $pin          \
+		-fixed true
+}
+
+# -----------------------------------------------------------------------------
+# UART
+# -----------------------------------------------------------------------------
+#
+# The FTDI FT4232H has 3 UARTs connected to the FPGA (p10 [1]).
+# FTDI channel D UART is converted to 1.8V and connects to Bank-0 (p7 [1]).
+#
+set_io -port_name uart_rxd \
+	-DIRECTION INPUT       \
+	-io_std LVCMOS18       \
+	-pin_name W21          \
+	-fixed true
+
+set_io -port_name uart_txd \
+	-DIRECTION OUTPUT      \
+	-io_std LVCMOS18       \
+	-pin_name Y21          \
+	-fixed true
+
+# -----------------------------------------------------------------------------
+# Raspberry Pi debug outputs
+# -----------------------------------------------------------------------------
+#
+# * RPi FPGA outputs on the outside (odd) edge of the 100-mil connector
+# * 8-pins = 37, 35, 33, 31, 29, 15, 13, 11
+#
+set pins [list B17 B19 A15 D18 D17 F20 F21 G18]
+for {set i 0} {$i < 8} {incr i} {
+	set pin [lindex $pins $i]
+	set_io -port_name rpi_debug\[$i\] \
+		-DIRECTION OUTPUT             \
+		-io_std LVCMOS33              \
+		-pin_name $pin                \
+		-fixed true
+}

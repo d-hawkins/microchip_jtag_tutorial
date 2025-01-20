@@ -1,0 +1,101 @@
+# -----------------------------------------------------------------------------
+# sf2_security.pdc
+#
+# 1/15/2025 D. W. Hawkins (dwh@caltech.edu)
+#
+# SmartFusion2 Security Physical Design Constraints (PDC).
+#
+# -----------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------
+# 50MHz clock
+# -----------------------------------------------------------------------------
+#
+# Bank 7: 2.5V
+#
+set_io clk_50mhz      \
+    -pinname K1       \
+    -fixed yes        \
+    -iostd LVCMOS25   \
+    -DIRECTION INPUT
+
+# -----------------------------------------------------------------------------
+# LEDs
+# -----------------------------------------------------------------------------
+#
+# Bank 8: 3.3V
+#
+set_io {led[0]}        \
+    -pinname E1        \
+    -fixed yes         \
+    -iostd LVCMOS33    \
+    -DIRECTION OUTPUT
+
+set_io {led[1]}        \
+    -pinname F4        \
+    -fixed yes         \
+    -iostd LVCMOS33    \
+    -DIRECTION OUTPUT
+
+
+set_io {led[2]}        \
+    -pinname F3        \
+    -fixed yes         \
+    -iostd LVCMOS33    \
+    -DIRECTION OUTPUT
+
+set_io {led[3]}        \
+    -pinname G7        \
+    -fixed yes         \
+    -iostd LVCMOS33    \
+    -DIRECTION OUTPUT
+
+set_io {led[4]}        \
+    -pinname H7        \
+    -fixed yes         \
+    -iostd LVCMOS33    \
+    -DIRECTION OUTPUT
+
+set_io {led[5]}        \
+    -pinname J6        \
+    -fixed yes         \
+    -iostd LVCMOS33    \
+    -DIRECTION OUTPUT
+
+set_io {led[6]}        \
+    -pinname H6        \
+    -fixed yes         \
+    -iostd LVCMOS33    \
+    -DIRECTION OUTPUT
+
+set_io {led[7]}        \
+    -pinname H5        \
+    -fixed yes         \
+    -iostd LVCMOS33    \
+    -DIRECTION OUTPUT
+
+# -----------------------------------------------------------------------------
+# USB UART
+# -----------------------------------------------------------------------------
+#
+# Bank 2: 3.3V
+#
+# FPGA UART RXD input
+#  - Schematic net UART0_TXD
+#  - FTDI output
+#  - Connects to Bank 2 MMUART_1_RXD
+set_io uart_rxd       \
+    -pinname G18      \
+    -fixed yes        \
+    -iostd LVCMOS33   \
+    -DIRECTION INPUT
+
+# FPGA UART TXD output
+#  - Schematic nets UART0_RXD
+#  - FTDI input
+#  - Connects to Bank 2 MMUART_1_TXD
+set_io uart_txd       \
+    -pinname H19      \
+    -fixed yes        \
+    -iostd LVCMOS33   \
+    -DIRECTION OUTPUT

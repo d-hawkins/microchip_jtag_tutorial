@@ -1,0 +1,99 @@
+# -----------------------------------------------------------------------------
+# sf2_kickstart.pdc
+#
+# 1/15/2025 D. W. Hawkins (dwh@caltech.edu)
+#
+# SmartFusion2 Kickstart Physical Design Constraints (PDC).
+#
+# -----------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------
+# 50MHz clock
+# -----------------------------------------------------------------------------
+#
+# Bank 4: VDDI4 = 2.5V or 3.3V (selectable)
+#
+set_io clk_50mhz      \
+    -pinname 44       \
+    -fixed yes        \
+    -iostd LVCMOS33   \
+    -DIRECTION INPUT
+
+# -----------------------------------------------------------------------------
+# Green and red LEDs
+# -----------------------------------------------------------------------------
+#
+# Bank 0: 2.5V
+#
+set_io {led_g[0]}      \
+    -pinname 130       \
+    -fixed yes         \
+    -iostd LVCMOS25    \
+    -DIRECTION OUTPUT
+
+set_io {led_g[1]}      \
+    -pinname 134       \
+    -fixed yes         \
+    -iostd LVCMOS25    \
+    -DIRECTION OUTPUT
+
+
+set_io {led_g[2]}      \
+    -pinname 141       \
+    -fixed yes         \
+    -iostd LVCMOS25    \
+    -DIRECTION OUTPUT
+
+set_io {led_g[3]}      \
+    -pinname 136       \
+    -fixed yes         \
+    -iostd LVCMOS25    \
+    -DIRECTION OUTPUT
+
+set_io {led_r[0]}      \
+    -pinname 129       \
+    -fixed yes         \
+    -iostd LVCMOS25    \
+    -DIRECTION OUTPUT
+
+set_io {led_r[1]}      \
+    -pinname 131       \
+    -fixed yes         \
+    -iostd LVCMOS25    \
+    -DIRECTION OUTPUT
+
+set_io {led_r[2]}      \
+    -pinname 137       \
+    -fixed yes         \
+    -iostd LVCMOS25    \
+    -DIRECTION OUTPUT
+
+set_io {led_r[3]}      \
+    -pinname 135       \
+    -fixed yes         \
+    -iostd LVCMOS25    \
+    -DIRECTION OUTPUT
+
+# -----------------------------------------------------------------------------
+# USB UART
+# -----------------------------------------------------------------------------
+#
+# Bank 7: VDDI7 = 2.5V or 3.3V (selectable)
+#
+# FPGA UART RXD input
+#  - Schematic nets USB_UART_TX = USB_UART_TXD = UART_TXD_OUT
+#  - FTDI output
+set_io uart_rxd       \
+    -pinname 1        \
+    -fixed yes        \
+    -iostd LVCMOS33   \
+    -DIRECTION INPUT
+
+# FPGA UART TXD output
+#  - Schematic nets USB_UART_RX = USB_UART_RXD = USB_UART_IN
+#  - FTDI input
+set_io uart_txd       \
+    -pinname 2        \
+    -fixed yes        \
+    -iostd LVCMOS33   \
+    -DIRECTION OUTPUT
