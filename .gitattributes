@@ -1,0 +1,20 @@
+# Microsoft Documents
+*.[xX][lL][sS][xX] filter=lfs diff=lfs merge=lfs -text
+*.[dD][oO][cC][xX] filter=lfs diff=lfs merge=lfs -text
+*.[pP][pP][tT][xX] filter=lfs diff=lfs merge=lfs -text
+*.[vV][sS][dD][xX] filter=lfs diff=lfs merge=lfs -text
+
+# PDF Documentation
+*.[pP][dD][fF] filter=lfs diff=lfs merge=lfs -text
+
+# Images
+*.[pP][nN][gG] filter=lfs diff=lfs merge=lfs -text
+*.[jJ][pP][gG] filter=lfs diff=lfs merge=lfs -text
+
+# Email
+*.[mM][sS][gG] filter=lfs diff=lfs merge=lfs -text
+
+# Compressed files
+*.[zZ][iI][pP] filter=lfs diff=lfs merge=lfs -text
+*.[gG][zZ] filter=lfs diff=lfs merge=lfs -text
+
