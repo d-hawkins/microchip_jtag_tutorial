@@ -30,6 +30,8 @@ module sf2_security (
 		// --------------------------------------------------------------------
 		//
 		// LEDs
+		//  * [7:0] = {blue, blue, red, red, green green, amber, amber}
+		//  * drive low to turn on
 		output [7:0] led,
 
 		// UART
@@ -100,7 +102,7 @@ module sf2_security (
 	// LED outputs
 	// ------------------------------------------------------------------------
 	//
-	assign led = {count[WIDTH-1], control[6:0]};
+	assign led = ~{count[WIDTH-1], control[6:0]};
 
 	// ------------------------------------------------------------------------
 	// UART loopback

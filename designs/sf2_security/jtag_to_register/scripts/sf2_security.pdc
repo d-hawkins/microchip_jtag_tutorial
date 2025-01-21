@@ -25,54 +25,15 @@ set_io clk_50mhz      \
 #
 # Bank 8: 3.3V
 #
-set_io {led[0]}        \
-    -pinname E1        \
-    -fixed yes         \
-    -iostd LVCMOS33    \
-    -DIRECTION OUTPUT
-
-set_io {led[1]}        \
-    -pinname F4        \
-    -fixed yes         \
-    -iostd LVCMOS33    \
-    -DIRECTION OUTPUT
-
-
-set_io {led[2]}        \
-    -pinname F3        \
-    -fixed yes         \
-    -iostd LVCMOS33    \
-    -DIRECTION OUTPUT
-
-set_io {led[3]}        \
-    -pinname G7        \
-    -fixed yes         \
-    -iostd LVCMOS33    \
-    -DIRECTION OUTPUT
-
-set_io {led[4]}        \
-    -pinname H7        \
-    -fixed yes         \
-    -iostd LVCMOS33    \
-    -DIRECTION OUTPUT
-
-set_io {led[5]}        \
-    -pinname J6        \
-    -fixed yes         \
-    -iostd LVCMOS33    \
-    -DIRECTION OUTPUT
-
-set_io {led[6]}        \
-    -pinname H6        \
-    -fixed yes         \
-    -iostd LVCMOS33    \
-    -DIRECTION OUTPUT
-
-set_io {led[7]}        \
-    -pinname H5        \
-    -fixed yes         \
-    -iostd LVCMOS33    \
-    -DIRECTION OUTPUT
+set pin_list [list E1 F4 F3 G7 H7 J6 H6 H5]
+for {set i 0} {$i < 8} {incr i} {
+	set pin [lindex $pin_list $i]
+	set_io led\[$i\]      \
+		-pinname $pin     \
+		-fixed yes        \
+		-iostd LVCMOS33   \
+		-DIRECTION OUTPUT
+}
 
 # -----------------------------------------------------------------------------
 # USB UART
