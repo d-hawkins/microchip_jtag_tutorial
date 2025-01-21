@@ -46,8 +46,8 @@ set_min_delay $tio_min -from [get_ports {uart_rxd}] -to  [get_ports {uart_txd}]
 # ------------------------
 #
 # Clock-to-output delays
-set tco_max 10.0
-set tco_min  6.1
+set tco_max 9.0
+set tco_min 5.5
 
 # Output delay constraints
 set output_max [expr {$clk_period - $tco_max}]

@@ -20,6 +20,8 @@ module sf2_security (
 		// --------------------------------------------------------------------
 		//
 		// LEDs
+		//  * [7:0] = {blue, blue, red, red, green green, amber, amber}
+		//  * drive low to turn on
 		output [7:0] led,
 
 		// UART
@@ -52,6 +54,9 @@ module sf2_security (
 	//
 	// Counter
 	logic [WIDTH-1:0] count;
+	//
+	// LED outputs
+	logic [7:0] led_out;
 
 	// ------------------------------------------------------------------------
 	// Counter
@@ -65,7 +70,10 @@ module sf2_security (
 	// LED outputs
 	// ------------------------------------------------------------------------
 	//
-	assign led = count[(WIDTH-1) -: 8];
+	always_ff @(posedge clk_50mhz) begin
+		led_out <= ~count[(WIDTH-1) -: 8];
+	end
+	assign led = led_out;
 
 	// ------------------------------------------------------------------------
 	// UART loopback
